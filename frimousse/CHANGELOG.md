@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-11
+
+- Fix the list staying filtered by the old search text after `EmojiPicker.Search` is removed (for example, hidden with `{#if}`). The original Frimousse keeps the old search in this case.
+
 ## [0.1.0] - 2026-10-11
 
 First release: a Svelte 5 port of [Frimousse](https://github.com/liveblocks/frimousse) 0.4.0 by Liveblocks.

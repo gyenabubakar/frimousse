@@ -1,7 +1,7 @@
 {
   "name": "@gyen/frimousse",
   "description": "A lightweight, unstyled, and composable emoji picker for Svelte. A Svelte 5 port of Liveblocks' Frimousse.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
