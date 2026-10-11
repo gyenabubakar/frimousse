@@ -5,7 +5,8 @@ export default defineWranglerConfig({
     generate: false,
   },
   build: {
-    command: 'pnpm build',
+    // The root build: the library first (the site uses its dist/), then the registry and the site.
+    command: 'pnpm -w build',
   },
   assetsDirectory: './dist',
 });

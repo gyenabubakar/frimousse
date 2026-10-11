@@ -80,7 +80,8 @@ trusted publisher: GitHub Actions, organization or user `gyenabubakar`, reposito
 
 ## Deploying the site (Cloudflare Workers Builds)
 
-- Root directory: `website`. Deploy command: `npx wrangler deploy --experimental-new-config`.
+- Root directory: `website`. Deploy command: `pnpm run deploy` (Wrangler runs the root build first: the library, then
+  the site). Every push to `main` deploys.
 - Build variables: `PNPM_VERSION=11.28.2`, and optionally `PUBLIC_CF_BEACON_TOKEN`. `SITE_URL` overrides the public
   URL (default `https://frimousse.gyen.dev`), which canonical links and the shadcn command in the docs use.
 
