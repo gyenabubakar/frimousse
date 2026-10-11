@@ -10,6 +10,7 @@
     "prepare": "husky",
     "dev": "pnpm -r --parallel dev",
     "build": "pnpm -r build",
+    "deploy": "pnpm --filter website run deploy",
     "test": "pnpm -r test",
     "test:e2e": "pnpm --filter website test:e2e",
     "check": "pnpm format && pnpm -r check && pnpm lint:fix",
