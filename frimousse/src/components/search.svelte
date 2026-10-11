@@ -19,6 +19,13 @@
     store.searchElement = ref;
   });
 
+  // When the search input is removed (e.g. hidden with {#if}), stop filtering the list by its old text.
+  // Upstream Frimousse keeps the old search in this case.
+  $effect(() => () => {
+    store.searchElement = null;
+    store.onSearchChange('');
+  });
+
   function handleInput(event: Event & { currentTarget: HTMLInputElement }) {
     oninput?.(event);
 

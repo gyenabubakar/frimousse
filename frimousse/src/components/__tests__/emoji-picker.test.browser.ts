@@ -3,6 +3,7 @@ import { render } from 'vitest-browser-svelte';
 import { page, userEvent } from 'vitest/browser';
 import { defaultEmojiDataResolver } from '../../data/emoji.js';
 import DefaultPage from './default-page.svelte';
+import SearchTogglePage from './search-toggle-page.svelte';
 import type { EmojiData, EmojiDataResolver, SkinTone } from '../../types.js';
 
 describe('EmojiPicker', () => {
@@ -222,6 +223,25 @@ describe('EmojiPicker.Search', () => {
     await page.getByTestId('search').fill('123456789');
     await expect.element(page.getByTestId('controlled-search')).toHaveValue('123456789');
     await expect.element(page.getByTestId('empty')).toBeInTheDocument();
+  });
+
+  it('should stop filtering once the search input is removed', async () => {
+    const { rerender } = await render(SearchTogglePage);
+    const list = page.getByTestId('list');
+
+    await expect.element(page.getByRole('gridcell', { name: 'Grinning cat' })).toBeInTheDocument();
+    await expect
+      .element(page.getByRole('gridcell', { name: 'Grinning face', exact: true }))
+      .not.toBeInTheDocument();
+
+    const filteredRows = Number(list.element().getAttribute('aria-rowcount'));
+
+    await rerender({ showSearch: false });
+
+    await expect
+      .element(page.getByRole('gridcell', { name: 'Grinning face', exact: true }))
+      .toBeInTheDocument();
+    expect(Number(list.element().getAttribute('aria-rowcount'))).toBeGreaterThan(filteredRows);
   });
 
   it('should support an external bound search value', async () => {
