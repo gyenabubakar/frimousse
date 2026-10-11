@@ -165,10 +165,10 @@ function attribute(name: string) {
               class="z-10 mx-2 mt-2 appearance-none rounded-md bg-neutral-100 px-2.5 py-2 text-sm dark:bg-neutral-800"
             />
             <EmojiPicker.Viewport class="relative flex-1 outline-hidden">
-              <EmojiPicker.Loading class="absolute inset-0 flex items-center justify-center text-sm text-neutral-400">
+              <EmojiPicker.Loading class="absolute inset-0 flex items-center justify-center text-sm text-neutral-500 dark:text-neutral-400">
                 Loading…
               </EmojiPicker.Loading>
-              <EmojiPicker.Empty class="absolute inset-0 flex items-center justify-center text-sm text-neutral-400">
+              <EmojiPicker.Empty class="absolute inset-0 flex items-center justify-center text-sm text-neutral-500 dark:text-neutral-400">
                 No emoji found.
               </EmojiPicker.Empty>
               <EmojiPicker.List class="pb-1.5 select-none">
@@ -230,7 +230,7 @@ function attribute(name: string) {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: light-dark(#a1a1a1, #737373);
+            color: light-dark(#737373, #a3a3a3);
             font-size: 14px;
           }
 
@@ -1229,6 +1229,10 @@ function attribute(name: string) {
           <code>useEmojiDetails</code> (which needs Suspense) is <code>loadEmojiDetails</code>,
           which returns a promise.
         </li>
+        <li>
+          <code>aria-rowindex</code> and <code>aria-colindex</code> count from 1, as ARIA requires.
+          The React version starts at 0, which screen readers reject.
+        </li>
       </ul>
 
       <Heading as="h2" text="Credits" />
@@ -1260,14 +1264,20 @@ function attribute(name: string) {
     <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-sm text-muted-foreground sm:px-6">
       <span>
         MIT license. Svelte port by{' '}
-        <a href={site.author.url} class="text-foreground hover:underline">
+        <a
+          href={site.author.url}
+          class="text-foreground underline decoration-foreground/30 underline-offset-3 hover:decoration-ember"
+        >
           {site.author.name}
         </a>
         .
       </span>
       <span>
         Based on{' '}
-        <a href={site.original} class="text-foreground hover:underline">
+        <a
+          href={site.original}
+          class="text-foreground underline decoration-foreground/30 underline-offset-3 hover:decoration-ember"
+        >
           Frimousse
         </a>{' '}
         by Liveblocks.

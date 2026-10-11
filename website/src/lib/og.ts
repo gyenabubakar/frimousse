@@ -47,7 +47,7 @@ function tiles() {
     node(
       'div',
       { gap: TILE_GAP },
-      ...Array.from({ length: TILE_COLUMNS }, (_, column) => {
+      ...Array.from({ length: TILE_COLUMNS }, (__, column) => {
         const isActive = row === 3 && column === 2;
 
         return node('div', {

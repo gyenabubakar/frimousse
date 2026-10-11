@@ -21,7 +21,8 @@
     data-slot="emoji-picker-loading"
     class="absolute inset-0 flex items-center justify-center text-muted-foreground"
   >
-    <SpinnerGapIcon class="size-4 animate-spin" />
+    <SpinnerGapIcon class="size-4 animate-spin" aria-hidden="true" />
+    <span class="sr-only">Loading…</span>
   </EmojiPickerPrimitive.Loading>
   <EmojiPickerPrimitive.Empty
     data-slot="emoji-picker-empty"

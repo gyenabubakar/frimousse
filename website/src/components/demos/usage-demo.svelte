@@ -8,12 +8,12 @@
   />
   <EmojiPicker.Viewport class="relative flex-1 outline-hidden">
     <EmojiPicker.Loading
-      class="absolute inset-0 flex items-center justify-center text-sm text-neutral-400 dark:text-neutral-500"
+      class="absolute inset-0 flex items-center justify-center text-sm text-neutral-500 dark:text-neutral-400"
     >
       Loading…
     </EmojiPicker.Loading>
     <EmojiPicker.Empty
-      class="absolute inset-0 flex items-center justify-center text-sm text-neutral-400 dark:text-neutral-500"
+      class="absolute inset-0 flex items-center justify-center text-sm text-neutral-500 dark:text-neutral-400"
     >
       No emoji found.
     </EmojiPicker.Empty>

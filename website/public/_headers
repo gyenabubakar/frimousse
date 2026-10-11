@@ -12,6 +12,10 @@
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
+# The shared code block stylesheet (src/pages/diffs.css.ts). Not hashed, so cache it for a day only.
+/diffs.css
+  Cache-Control: public, max-age=86400
+
 # The shadcn-svelte CLI fetches these from other origins.
 /r/*
   Access-Control-Allow-Origin: *

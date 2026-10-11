@@ -1,6 +1,7 @@
 ---
 import '$styles/global.css';
 
+import { DIFFS_STYLESHEET } from '$lib/diffs';
 import { site } from '$site';
 
 interface Props {
@@ -21,6 +22,11 @@ const beaconToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- The demos fetch their emoji data from here as soon as they load. -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- Every code block's shadow root links to this; fetching it early keeps them from showing unstyled. -->
+    <link rel="preload" href={DIFFS_STYLESHEET} as="style" />
     <title>{fullTitle}</title>
     <link rel="canonical" href={canonical} />
     <link rel="sitemap" href="/sitemap-index.xml" />

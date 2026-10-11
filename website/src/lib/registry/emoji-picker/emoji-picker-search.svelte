@@ -16,7 +16,7 @@
   data-slot="emoji-picker-search-wrapper"
   class={cn('flex h-9 items-center gap-2 border-b px-3', className)}
 >
-  <MagnifyingGlassIcon class="size-4 shrink-0 opacity-50" />
+  <MagnifyingGlassIcon class="size-4 shrink-0 opacity-50" aria-hidden="true" />
   <EmojiPickerPrimitive.Search
     bind:ref
     bind:value

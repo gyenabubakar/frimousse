@@ -24,12 +24,14 @@ describe('EmojiPicker', () => {
 
     const rows = page.getByRole('row');
 
-    await expect.element(rows.nth(5)).toHaveAttribute('aria-rowindex', '5');
+    // ARIA positions count from 1.
+    await expect.element(rows.first()).toHaveAttribute('aria-rowindex', '1');
+    await expect.element(rows.nth(5)).toHaveAttribute('aria-rowindex', '6');
 
     const emojis = page.getByRole('gridcell');
 
     await expect.element(emojis.first()).toHaveAttribute('role', 'gridcell');
-    await expect.element(emojis.first()).toHaveAttribute('aria-colindex', '0');
+    await expect.element(emojis.first()).toHaveAttribute('aria-colindex', '1');
 
     await emojis.nth(2).hover();
     await emojis.first().hover();
@@ -175,13 +177,13 @@ describe('EmojiPicker.Root', () => {
   it('should support an initial columns count and changing it', async () => {
     const { rerender } = await render(DefaultPage, { columns: 5 });
 
-    await expect.element(page.getByRole('gridcell').nth(4)).toHaveAttribute('aria-colindex', '4');
-    await expect.element(page.getByRole('gridcell').nth(5)).toHaveAttribute('aria-colindex', '0');
-    await expect.element(page.getByRole('gridcell').nth(9)).toHaveAttribute('aria-colindex', '4');
+    await expect.element(page.getByRole('gridcell').nth(4)).toHaveAttribute('aria-colindex', '5');
+    await expect.element(page.getByRole('gridcell').nth(5)).toHaveAttribute('aria-colindex', '1');
+    await expect.element(page.getByRole('gridcell').nth(9)).toHaveAttribute('aria-colindex', '5');
 
     await rerender({ columns: 8 });
 
-    await expect.element(page.getByRole('gridcell').nth(7)).toHaveAttribute('aria-colindex', '7');
+    await expect.element(page.getByRole('gridcell').nth(7)).toHaveAttribute('aria-colindex', '8');
   });
 
   it('should support disabling sticky category headers', async () => {
@@ -273,16 +275,16 @@ describe('EmojiPicker.Viewport', () => {
         ?.scrollBy({ top: 500, behavior: 'smooth' });
     }
 
-    await expect.element(page.getByRole('row').nth(5)).toHaveAttribute('aria-rowindex', '5');
+    await expect.element(page.getByRole('row').nth(5)).toHaveAttribute('aria-rowindex', '6');
     await expect.element(page.getByRole('row').nth(20)).not.toBeInTheDocument();
 
     scrollViewport();
 
-    await expect.element(page.getByRole('row').nth(5)).toHaveAttribute('aria-rowindex', '20');
+    await expect.element(page.getByRole('row').nth(5)).toHaveAttribute('aria-rowindex', '21');
 
     scrollViewport();
 
-    await expect.element(page.getByRole('row').nth(5)).toHaveAttribute('aria-rowindex', '38');
+    await expect.element(page.getByRole('row').nth(5)).toHaveAttribute('aria-rowindex', '39');
   });
 });
 

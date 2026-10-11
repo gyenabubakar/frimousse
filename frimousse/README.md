@@ -56,6 +56,7 @@ The parts have no styles. Style them with classes, or with the `[frimousse-*]` a
 - Element parts have a bindable `ref`.
 - `useSkinTone()` and `useActiveEmoji()` return objects with a reactive `current`.
 - `useEmojiDetails` is `loadEmojiDetails`, which returns a promise (use it with `{#await}`).
+- `aria-rowindex` and `aria-colindex` count from 1, as ARIA requires (the React version starts at 0).
 
 See [frimousse.gyen.dev](https://frimousse.gyen.dev) for the full API reference.
 

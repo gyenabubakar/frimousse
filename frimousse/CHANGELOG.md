@@ -9,3 +9,4 @@ First release: a Svelte 5 port of [Frimousse](https://github.com/liveblocks/frim
 - Add `bind:value` on `EmojiPicker.Search`, `bind:skinTone` on `EmojiPicker.Root`, and a bindable `ref` on element parts.
 - Add `useSkinTone` and `useActiveEmoji`, which return reactive objects.
 - Add `defaultEmojiDataResolver`, `createEmojiDataCache`, `getEmojiDetails`, and `loadEmojiDetails` (the promise-based version of `useEmojiDetails`).
+- Count `aria-rowindex` and `aria-colindex` from 1, as ARIA requires (the React version starts at 0).

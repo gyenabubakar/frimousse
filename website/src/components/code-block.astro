@@ -1,6 +1,6 @@
 ---
-import { preloadFile } from '@pierre/diffs/ssr';
 import type { SupportedLanguages } from '@pierre/diffs';
+import { renderCode } from '$lib/diffs';
 
 interface Props {
   code: string;
@@ -16,20 +16,12 @@ const indent = Math.min(
 );
 const source = lines.map((line) => line.slice(indent)).join('\n');
 // Pre-rendered into a declarative shadow root at build time, like effectelements.com's Markdown code blocks.
-const { prerenderedHTML } = await preloadFile({
-  file: { name: title ?? `snippet.${lang}`, contents: source, lang },
-  options: {
-    theme: { dark: 'pierre-dark', light: 'pierre-light' },
-    themeType: 'system',
-    disableFileHeader: !title,
-    overflow: 'scroll',
-  },
-});
+const html = await renderCode(source, lang, title);
 ---
 
 <div class="code-block my-5">
   <diffs-container>
-    <template shadowrootmode="open" set:html={prerenderedHTML} />
+    <template shadowrootmode="open" set:html={html} />
   </diffs-container>
   <button type="button" class="copy-code" aria-label="Copy code" data-code={source}>
     Copy

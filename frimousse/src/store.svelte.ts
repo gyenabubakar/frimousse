@@ -168,7 +168,8 @@ export class EmojiPickerStore {
 
     if (rowIndex === 0) viewport.scrollTo({ top: 0, behavior: 'instant' });
 
-    const row = list.querySelector(`[aria-rowindex="${rowIndex}"]`);
+    // aria-rowindex counts from 1.
+    const row = list.querySelector(`[aria-rowindex="${rowIndex + 1}"]`);
 
     if (!(row instanceof HTMLElement)) return;
 

@@ -85,7 +85,8 @@
   ): EmojiPickerListEmojiProps['props'] {
     return {
       role: 'gridcell',
-      'aria-colindex': columnIndex,
+      // ARIA counts columns and rows from 1 (the React version starts at 0, which screen readers reject).
+      'aria-colindex': columnIndex + 1,
       'aria-selected': isActive || undefined,
       'aria-label': emoji.label,
       'data-active': isActive ? '' : undefined,
@@ -122,7 +123,7 @@
   function rowProps(rowIndex: number, sizer = false): EmojiPickerAttributes<HTMLDivElement> {
     return {
       role: sizer ? undefined : 'row',
-      'aria-rowindex': sizer ? undefined : rowIndex,
+      'aria-rowindex': sizer ? undefined : rowIndex + 1,
       'frimousse-row': '',
       style: sizer
         ? 'display: flex;'
