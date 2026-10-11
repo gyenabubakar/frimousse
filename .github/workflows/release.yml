@@ -1,7 +1,7 @@
 name: Release
 
 # Publishes @gyen/frimousse to npm when a tag like `frimousse@0.1.1` is pushed (see "Releasing" in README.md).
-# Uses npm trusted publishing: no npm token, and npm adds provenance on its own.
+# Uses npm trusted publishing (no npm token) with staged publishing: the version waits on npm until you approve it.
 on:
   push:
     tags:
@@ -56,15 +56,19 @@ jobs:
             echo "already=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Everything above already ran, so skip prepublishOnly running it again.
-      - name: Publish to npm
+      # Staged, not published: the version goes live only after you approve it with your npm 2FA
+      # (`npm stage approve <stage-id>`; the ID is in this step's output). Everything above already ran, so
+      # skip prepublishOnly running it again. Staged publishes don't add provenance unless asked.
+      - name: Stage the version on npm
         if: steps.published.outputs.already != 'true'
         working-directory: frimousse
-        run: npm publish --access public --ignore-scripts
+        run: npm stage publish --access public --provenance --ignore-scripts
 
+      # A draft while the staged version waits for approval; publish it on GitHub after approving on npm.
       - name: Create the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          DRAFT: ${{ steps.published.outputs.already != 'true' }}
         run: |
           version=${GITHUB_REF_NAME#frimousse@}
           # The CHANGELOG section for this version, without its heading.
@@ -73,4 +77,5 @@ jobs:
             found && /^## \[/ { exit }
             found { print }
           ' frimousse/CHANGELOG.md > release-notes.md
-          gh release create "$GITHUB_REF_NAME" --title "@gyen/frimousse $version" --notes-file release-notes.md
+          gh release create "$GITHUB_REF_NAME" --title "@gyen/frimousse $version" --notes-file release-notes.md \
+            $([ "$DRAFT" = "true" ] && echo --draft)

@@ -38,9 +38,10 @@ npx shadcn-svelte@latest add https://frimousse.gyen.dev/r/emoji-picker.json
 
 ## Releasing
 
-New versions are published by GitHub Actions (`.github/workflows/release.yml`) when you push a tag like
-`frimousse@0.1.1`. It runs the full build and all checks and tests, then publishes to npm with provenance and creates
-a GitHub release from the CHANGELOG.
+New versions go through GitHub Actions (`.github/workflows/release.yml`) when you push a tag like `frimousse@0.1.1`.
+It runs the full build and all checks and tests, then stages the version on npm (with provenance) and creates a draft
+GitHub release from the CHANGELOG. A staged version isn't live until you approve it with your npm 2FA, so a stolen
+GitHub login alone can't publish.
 
 ### Every release
 
@@ -59,8 +60,19 @@ a GitHub release from the CHANGELOG.
    git push && git push --tags
    ```
 
-The workflow stops before publishing if the tag doesn't match the version in `frimousse/package.json`, or if any
-check fails. If the shadcn component changed, redeploy the site too.
+6. When the workflow finishes, approve the staged version. Its stage ID is in the output of the "Stage the version on
+   npm" step:
+
+   ```bash
+   npm stage approve <stage-id>
+   ```
+
+   npm asks for your 2FA code, then publishes the version.
+
+7. Publish the draft release on GitHub (Releases → the draft → Publish release).
+
+The workflow stops before staging if the tag doesn't match the version in `frimousse/package.json`, or if any check
+fails. If the shadcn component changed, redeploy the site too.
 
 ### First release (0.1.0), by hand
 
@@ -76,7 +88,8 @@ git push --tags
 `prepublishOnly` builds, tests and type-checks first. Pushing the tag runs the release workflow, which sees 0.1.0 is
 already on npm and only creates the GitHub release. Then, on npmjs.com, open the package's settings and add a
 trusted publisher: GitHub Actions, organization or user `gyenabubakar`, repository `frimousse`, workflow filename
-`release.yml`. The first publish through it must happen within 2 days of setting it up, or the setup expires.
+`release.yml`. Under "Allowed actions", leave "Allow npm publish" and "Allow npm dist-tag" unticked: the workflow only
+stages. The first release through it must happen within 2 days of setting it up, or the setup expires.
 
 ## Deploying the site (Cloudflare Workers Builds)
 
