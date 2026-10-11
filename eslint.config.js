@@ -26,6 +26,8 @@ export default defineConfig(
       '**/.wrangler/**',
       '**/.cloudflare/**',
       '**/.vitest/**',
+      // Local AI tool data, such as temporary worktree copies of the repo.
+      '.claude/**',
       'website/public/r/**',
       // Vendored shadcn-svelte components — re-fetched from upstream, not ours to restyle.
       'website/src/lib/components/ui/**',

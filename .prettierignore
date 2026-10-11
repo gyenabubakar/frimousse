@@ -9,6 +9,9 @@ dist
 .wrangler
 .cloudflare
 
+# Local AI tool data, such as temporary worktree copies of the repo.
+.claude
+
 # Generated shadcn-svelte registry output (built from website/src/lib/registry).
 website/public/r
 
