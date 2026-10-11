@@ -1,0 +1,76 @@
+name: Release
+
+# Publishes @gyen/frimousse to npm when a tag like `frimousse@0.1.1` is pushed (see "Releasing" in README.md).
+# Uses npm trusted publishing: no npm token, and npm adds provenance on its own.
+on:
+  push:
+    tags:
+      - 'frimousse@*'
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      # Lets GitHub Actions prove to npm who is publishing (trusted publishing).
+      id-token: write
+      # Creates the GitHub release.
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      # pnpm version comes from `packageManager` in package.json.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or later.
+      - run: npm install -g npm@latest
+
+      - name: Check the tag matches the package version
+        run: |
+          version=$(node -p "require('./frimousse/package.json').version")
+          if [ "$GITHUB_REF_NAME" != "frimousse@$version" ]; then
+            echo "Tag $GITHUB_REF_NAME doesn't match frimousse/package.json version $version."
+            exit 1
+          fi
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @gyen/frimousse exec playwright install --with-deps chromium-headless-shell
+      - run: pnpm --filter website exec playwright install --with-deps chromium
+      - run: pnpm build
+      - run: pnpm check:ci
+      - run: pnpm test
+      - run: pnpm test:e2e
+
+      # The first version (0.1.0) is published by hand, so its tag only creates the GitHub release.
+      - name: Check if this version is already on npm
+        id: published
+        run: |
+          version=${GITHUB_REF_NAME#frimousse@}
+          if npm view "@gyen/frimousse@$version" version >/dev/null 2>&1; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Everything above already ran, so skip prepublishOnly running it again.
+      - name: Publish to npm
+        if: steps.published.outputs.already != 'true'
+        working-directory: frimousse
+        run: npm publish --access public --ignore-scripts
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=${GITHUB_REF_NAME#frimousse@}
+          # The CHANGELOG section for this version, without its heading.
+          awk -v heading="## [$version]" '
+            index($0, heading) == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' frimousse/CHANGELOG.md > release-notes.md
+          gh release create "$GITHUB_REF_NAME" --title "@gyen/frimousse $version" --notes-file release-notes.md

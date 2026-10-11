@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Notes for AI coding agents working on this repo. Humans: see README.md.
+Notes for AI coding agents working on this repo. See README.md.
 
 ## What this is
 

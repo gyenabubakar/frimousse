@@ -36,13 +36,47 @@ The `emoji-picker` item lives in `website/src/lib/registry/emoji-picker/` and is
 npx shadcn-svelte@latest add https://frimousse.gyen.dev/r/emoji-picker.json
 ```
 
-## Publishing the library
+## Releasing
+
+New versions are published by GitHub Actions (`.github/workflows/release.yml`) when you push a tag like
+`frimousse@0.1.1`. It runs the full build and all checks and tests, then publishes to npm with provenance and creates
+a GitHub release from the CHANGELOG.
+
+### Every release
+
+1. While working, add each user-facing change to `frimousse/CHANGELOG.md` under `## [Unreleased]`, in the same
+   commit as the change.
+2. Pick the version. While it's `0.x`: patch (`0.1.1`) for fixes, minor (`0.2.0`) for new features or anything that
+   breaks existing code.
+3. Bump it: `cd frimousse && npm version 0.1.1 --no-git-tag-version`.
+4. In the CHANGELOG, rename `## [Unreleased]` to `## [0.1.1] - YYYY-MM-DD` and add a new empty `## [Unreleased]`
+   above it.
+5. Commit, tag and push:
+
+   ```bash
+   git commit -am "chore(release): @gyen/frimousse 0.1.1"
+   git tag frimousse@0.1.1
+   git push && git push --tags
+   ```
+
+The workflow stops before publishing if the tag doesn't match the version in `frimousse/package.json`, or if any
+check fails. If the shadcn component changed, redeploy the site too.
+
+### First release (0.1.0), by hand
+
+Trusted publishing is set up on a package that already exists, so publish the first version from your machine
+(logged in with `npm login`):
 
 ```bash
 pnpm --filter @gyen/frimousse publish --access public
+git tag frimousse@0.1.0
+git push --tags
 ```
 
-`prepublishOnly` builds, tests and type-checks first.
+`prepublishOnly` builds, tests and type-checks first. Pushing the tag runs the release workflow, which sees 0.1.0 is
+already on npm and only creates the GitHub release. Then, on npmjs.com, open the package's settings and add a
+trusted publisher: GitHub Actions, organization or user `gyenabubakar`, repository `frimousse`, workflow filename
+`release.yml`. The first publish through it must happen within 2 days of setting it up, or the setup expires.
 
 ## Deploying the site (Cloudflare Workers Builds)
 
