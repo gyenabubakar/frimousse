@@ -192,6 +192,24 @@ test.describe('site', () => {
         .first(),
     ).toBeAttached();
   });
+
+  test('has a share image', async ({ page, request }) => {
+    await page.goto('/');
+
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+      'content',
+      'https://frimousse.gyen.dev/og.png',
+    );
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+      'content',
+      'summary_large_image',
+    );
+
+    const image = await request.get('/og.png');
+
+    expect(image.ok()).toBe(true);
+    expect(image.headers()['content-type']).toBe('image/png');
+  });
 });
 
 test.describe('shadcn-svelte registry', () => {
