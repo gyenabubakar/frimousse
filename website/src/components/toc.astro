@@ -1,0 +1,177 @@
+---
+import { slug } from '$lib/slug';
+
+export interface TocEntry {
+  text: string;
+  depth: 2 | 3;
+}
+
+interface Props {
+  entries: TocEntry[];
+}
+const { entries } = Astro.props;
+---
+
+<nav aria-label="On this page" class="toc text-[13px]">
+  <p class="label-mono mb-3">On this page</p>
+  <ul class="relative">
+    {/*
+        The track is an SVG path that steps right for nested (h3) entries. The thumb is the same path in
+        ember with a dash pattern that only draws the active entry's stretch; animating the dash moves it
+        along the path, bends included.
+      */}
+    <svg class="toc-track" aria-hidden="true">
+      <path class="toc-track-line" />
+      <path class="toc-track-thumb" />
+    </svg>
+    {entries.map((entry) => (
+      <li>
+        <a
+          href={`#${slug(entry.text)}`}
+          data-toc={slug(entry.text)}
+          data-depth={entry.depth}
+          title={entry.text}
+          class="toc-link block truncate py-1 leading-snug"
+        >
+          {entry.text}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .toc-link {
+    padding-left: 0.75rem;
+    color: var(--muted-foreground);
+  }
+  .toc-link[data-depth='3'] {
+    padding-left: 1.75rem;
+  }
+  .toc-link:hover,
+  .toc-link[data-active] {
+    color: var(--foreground);
+  }
+  .toc-track {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 16px;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .toc-track path {
+    fill: none;
+    stroke-linejoin: round;
+  }
+  .toc-track-line {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+  .toc-track-thumb {
+    stroke: var(--ember);
+    stroke-width: 1.5;
+    stroke-dasharray: 0 0 0 10000;
+    transition: stroke-dasharray 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .toc-track-thumb {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // The active heading is the last one whose top has passed just below the sticky top bar.
+  const OFFSET = 96;
+  // x of the track for top-level (h2) and nested (h3) entries; nested link padding leaves the same gap to the text.
+  const TRACK_X = { 2: 0.5, 3: 16.5 } as Record<string, number>;
+
+  /**
+   * One vertical run per entry at its depth's x, joined by short diagonals where the depth changes.
+   * Also returns where each entry's run starts and ends, measured along the path, for the dash pattern.
+   */
+  function trackPath(links: HTMLAnchorElement[]) {
+    const parts: string[] = [];
+    const runs: { start: number; end: number }[] = [];
+    let length = 0;
+    let previous: { x: number; y: number } | null = null;
+
+    for (const link of links) {
+      const column = TRACK_X[link.dataset.depth!] ?? TRACK_X[2]!;
+      const top = link.offsetTop;
+      const bottom = top + link.offsetHeight;
+
+      if (previous) length += Math.hypot(column - previous.x, top - previous.y);
+      parts.push(`${previous ? 'L' : 'M'}${column} ${top} L${column} ${bottom}`);
+      runs.push({ start: length, end: length + (bottom - top) });
+      length += bottom - top;
+      previous = { x: column, y: bottom };
+    }
+
+    return { d: parts.join(' '), runs, length };
+  }
+
+  function setup() {
+    const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc]')];
+    const headings = links
+      .map((link) => document.getElementById(link.dataset.toc!))
+      .filter((heading): heading is HTMLElement => !!heading);
+    const svg = document.querySelector<SVGSVGElement>('.toc-track');
+    const thumb = svg?.querySelector<SVGPathElement>('.toc-track-thumb');
+
+    if (!headings.length || !svg || !thumb) return;
+
+    let track = trackPath(links);
+
+    function draw() {
+      track = trackPath(links);
+      svg!.querySelectorAll('path').forEach((path) => path.setAttribute('d', track.d));
+    }
+
+    function update() {
+      let active = headings[0];
+
+      for (const heading of headings) {
+        if (heading.getBoundingClientRect().top - OFFSET > 0) break;
+
+        active = heading;
+      }
+
+      if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) {
+        active = headings.at(-1) ?? active;
+      }
+
+      let activeIndex = -1;
+
+      links.forEach((link, index) => {
+        const isActive = link.dataset.toc === active?.id;
+
+        link.toggleAttribute('data-active', isActive);
+        if (isActive) activeIndex = index;
+      });
+
+      const run = track.runs[activeIndex];
+
+      // Four values (0-length dash, gap to the run, the run, rest of the path) so every state interpolates.
+      if (run) {
+        thumb!.style.strokeDasharray = `0 ${run.start} ${run.end - run.start} ${track.length}`;
+      }
+    }
+
+    // Place the thumb without sliding in from the top on page load.
+    thumb.style.transition = 'none';
+    draw();
+    update();
+    thumb.getBoundingClientRect();
+    thumb.style.transition = '';
+
+    addEventListener('scroll', update, { passive: true });
+    addEventListener('resize', () => {
+      draw();
+      update();
+    });
+  }
+
+  setup();
+</script>

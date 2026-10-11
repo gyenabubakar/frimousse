@@ -1,0 +1,195 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn-svelte/tailwind.css';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/merriweather';
+@import '@fontsource/dm-mono/400.css';
+@import '@fontsource/dm-mono/500.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* The same warm neutrals and ember accent as effectelements.com. */
+:root {
+  --ember: oklch(0.64 0.2 36);
+  --grid-line: oklch(0.18 0.01 60 / 7%);
+
+  --background: oklch(0.992 0.003 85);
+  --foreground: oklch(0.2 0.012 60);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.2 0.012 60);
+  --primary-foreground: oklch(0.985 0.003 85);
+  --secondary: oklch(0.96 0.005 80);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.965 0.005 80);
+  --muted-foreground: oklch(0.5 0.012 60);
+  --accent: oklch(0.955 0.008 70);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.2 0.012 60 / 11%);
+  --input: oklch(0.2 0.012 60 / 14%);
+  --ring: var(--ember);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --ember: oklch(0.72 0.19 40);
+  --grid-line: oklch(1 0 0 / 5%);
+
+  --background: oklch(0.16 0.006 60);
+  --foreground: oklch(0.95 0.004 80);
+  --card: oklch(0.19 0.006 60);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.19 0.006 60);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.95 0.004 80);
+  --primary-foreground: oklch(0.16 0.006 60);
+  --secondary: oklch(0.23 0.006 60);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.22 0.006 60);
+  --muted-foreground: oklch(0.68 0.01 70);
+  --accent: oklch(0.26 0.008 60);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 13%);
+}
+
+@theme inline {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+  --font-heading: 'Merriweather Variable', ui-serif, Georgia, serif;
+  --color-ember: var(--ember);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans antialiased;
+    color-scheme: light;
+    scrollbar-gutter: stable;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--ember) 30%, transparent);
+  }
+}
+
+@utility label-mono {
+  @apply font-mono text-[11px] tracking-wider text-muted-foreground uppercase;
+}
+
+/* Grid-paper backdrop behind the demos. */
+@utility grid-paper {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* The docs text: one page, so the rules live here instead of a typography plugin. */
+@layer components {
+  .docs {
+    @apply text-[15px] leading-7 text-foreground/90;
+  }
+  .docs h2 {
+    @apply mt-20 mb-4 scroll-mt-20 text-2xl font-semibold text-foreground;
+  }
+  .docs h3 {
+    @apply mt-12 mb-3 scroll-mt-20 text-lg font-semibold text-foreground;
+  }
+  .docs h4 {
+    @apply mt-8 mb-3 scroll-mt-20 font-sans text-sm font-semibold text-foreground;
+  }
+  .docs p {
+    @apply my-4;
+  }
+  .docs ul {
+    @apply my-4 list-disc pl-5;
+  }
+  .docs a:not(.heading-anchor) {
+    @apply text-foreground underline decoration-foreground/25 underline-offset-3 transition-colors hover:decoration-ember;
+  }
+  .docs :not(pre) > code {
+    @apply bg-muted px-1.5 py-0.5 font-mono text-[0.85em] text-foreground;
+  }
+  .docs .heading-anchor {
+    @apply ml-2 text-muted-foreground opacity-0 transition-opacity;
+  }
+  .docs :is(h2, h3, h4):hover .heading-anchor {
+    @apply opacity-100;
+  }
+}
+
+/* Code blocks rendered with @pierre/diffs (src/components/code-block.astro), styled as on effectelements.com. */
+.code-block {
+  @apply relative overflow-hidden rounded-lg border;
+  & diffs-container {
+    display: block;
+    --diffs-font-family: var(--font-mono);
+    --diffs-header-font-family: var(--font-sans);
+    --diffs-font-size: 13px;
+    --diffs-line-height: 21px;
+    --diffs-light-bg: var(--card);
+    --diffs-dark-bg: var(--card);
+  }
+  /* Above Pierre's file name bar (which sits on its own layer), and short enough for a one-line block. */
+  & .copy-code {
+    @apply absolute top-1.5 right-1.5 z-10 flex h-6 items-center rounded-md border bg-background/80 px-2 label-mono opacity-0 backdrop-blur transition-opacity;
+  }
+  &:hover .copy-code,
+  & .copy-code:focus-visible {
+    @apply opacity-100;
+  }
+}
+
+/* Pierre's :host rule says `color-scheme: light dark`; an outer rule on the host wins, so the site toggle controls it. */
+html:not(.dark) diffs-container {
+  color-scheme: light;
+}
+html.dark diffs-container {
+  color-scheme: dark;
+}

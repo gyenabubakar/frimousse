@@ -1,0 +1,44 @@
+---
+import { version } from '@gyen/frimousse/package.json';
+import { site } from '$site';
+import Icon from './icon.astro';
+import ThemeToggle from './theme-toggle.svelte';
+---
+
+<header class="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
+  <div class="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
+    <a href="/" class="inline-flex items-center gap-2 font-semibold tracking-tight">
+      <span class="text-xl leading-none" aria-hidden="true">
+        🙂
+      </span>
+      <span class="font-heading text-[15px]">
+        frimousse<span class="font-normal text-muted-foreground">/svelte</span>
+      </span>
+    </a>
+    <span class="hidden rounded-sm border px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground sm:inline">
+      v{version}
+    </span>
+    <div class="ml-auto flex items-center gap-1.5">
+      <a
+        href={`https://www.npmjs.com/package/${site.packageName}`}
+        target="_blank"
+        rel="noopener"
+        class="rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        npm
+      </a>
+      {site.repo && (
+        <a
+          href={site.repo}
+          target="_blank"
+          rel="noopener"
+          class="grid size-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+          aria-label="GitHub"
+        >
+          <Icon name="ph-github-logo" class="size-4.25" />
+        </a>
+      )}
+      <ThemeToggle client:load />
+    </div>
+  </div>
+</header>

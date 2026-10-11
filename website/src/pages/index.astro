@@ -1,0 +1,1277 @@
+---
+import CodeBlock from '$components/code-block.astro';
+import DemoFrame from '$components/demo-frame.astro';
+import ColorfulDemo from '$components/demos/colorful-demo.svelte';
+import CustomSkinToneDemo from '$components/demos/custom-skin-tone-demo.svelte';
+import HeroDemo from '$components/demos/hero-demo.svelte';
+import OptionsDemo from '$components/demos/options-demo.svelte';
+import PopoverDemo from '$components/demos/popover-demo.svelte';
+import UsageDemo from '$components/demos/usage-demo.svelte';
+import Heading from '$components/heading.astro';
+import PropsTable from '$components/props-table.astro';
+import Toc from '$components/toc.astro';
+import TopBar from '$components/top-bar.astro';
+import BaseLayout from '$layouts/base.astro';
+import { site } from '$site';
+import type { TocEntry } from '$components/toc.astro';
+
+const SITE_URL = (Astro.site?.href ?? 'https://example.com/').replace(/\/$/, '');
+const shadcnCommand = `npx shadcn-svelte@latest add ${SITE_URL}/r/emoji-picker.json`;
+
+const toc: TocEntry[] = [
+  { text: 'Installation', depth: 2 },
+  { text: 'shadcn-svelte', depth: 3 },
+  { text: 'Usage', depth: 2 },
+  { text: 'Options', depth: 3 },
+  { text: 'In a popover', depth: 3 },
+  { text: 'Custom data sources and locales', depth: 3 },
+  { text: 'Looking up an emoji', depth: 3 },
+  { text: 'Styling', depth: 2 },
+  { text: 'Dimensions', depth: 3 },
+  { text: 'List padding', depth: 3 },
+  { text: 'Colorful buttons', depth: 3 },
+  { text: 'API Reference', depth: 2 },
+  { text: 'EmojiPicker.Root', depth: 3 },
+  { text: 'EmojiPicker.Search', depth: 3 },
+  { text: 'EmojiPicker.Viewport', depth: 3 },
+  { text: 'EmojiPicker.List', depth: 3 },
+  { text: 'EmojiPicker.Loading', depth: 3 },
+  { text: 'EmojiPicker.Empty', depth: 3 },
+  { text: 'EmojiPicker.SkinToneSelector', depth: 3 },
+  { text: 'EmojiPicker.SkinTone', depth: 3 },
+  { text: 'EmojiPicker.ActiveEmoji', depth: 3 },
+  { text: 'useSkinTone', depth: 3 },
+  { text: 'useActiveEmoji', depth: 3 },
+  { text: 'defaultEmojiDataResolver', depth: 3 },
+  { text: 'createEmojiDataCache', depth: 3 },
+  { text: 'getEmojiDetails', depth: 3 },
+  { text: 'loadEmojiDetails', depth: 3 },
+  { text: 'Differences from React', depth: 2 },
+  { text: 'Credits', depth: 2 },
+];
+
+function attribute(name: string) {
+  return { name, description: 'Can be targeted in CSS for styling.' };
+}
+---
+
+<BaseLayout>
+  <TopBar />
+  <div class="mx-auto flex max-w-6xl gap-12 px-4 sm:px-6">
+    <main class="docs min-w-0 flex-1 pb-24">
+      <section class="pt-14 pb-6 md:pt-20">
+        <p class="label-mono mb-4">Svelte 5 · unstyled · composable</p>
+        <h1 class="text-4xl/tight font-semibold text-foreground md:text-5xl">
+          An emoji picker for Svelte
+        </h1>
+        <p class="mt-5 max-w-xl text-lg text-muted-foreground">
+          {site.description} A Svelte port of
+          <a href={site.original} target="_blank" rel="noopener">
+            Frimousse
+          </a>{' '}
+          by Liveblocks, with the same parts, data attributes and CSS variables.
+        </p>
+        <DemoFrame name="hero">
+          <HeroDemo client:load />
+        </DemoFrame>
+      </section>
+
+      <Heading as="h2" text="Installation" />
+      <CodeBlock lang="bash" code="npm i @gyen/frimousse" />
+      <p>
+        Or with <code>pnpm add @gyen/frimousse</code>. It needs Svelte 5 and has no other
+        dependencies.
+      </p>
+
+      <Heading as="h3" text="shadcn-svelte" />
+      <p>
+        If you use{' '}
+        <a href="https://shadcn-svelte.com" target="_blank" rel="noopener">
+          shadcn-svelte
+        </a>
+        , you can install a ready-made version that uses your theme's colors, with the shadcn-svelte
+        CLI:
+      </p>
+      <CodeBlock lang="bash" code={shadcnCommand} />
+      <p class="border-l-2 border-ember pl-4 text-sm text-muted-foreground">
+        On SvelteKit 3, if the command fails with <code>File '$app/tsconfig' not found</code>, run
+        <code>npx svelte-kit sync</code> first, then run it again. SvelteKit generates that file,
+        and shadcn-svelte needs it for every component, not only this one.
+      </p>
+      <p>
+        It adds <code>$lib/components/ui/emoji-picker</code> and installs
+        <code>@gyen/frimousse</code> and <code>phosphor-svelte</code> (for the search and loading
+        icons). Then use it like any other shadcn-svelte component:
+      </p>
+      <CodeBlock
+        code={`
+          <script lang="ts">
+            import * as EmojiPicker from "$lib/components/ui/emoji-picker";
+          </script>
+
+          <EmojiPicker.Root
+            class="h-85.5 rounded-lg border shadow-md"
+            onEmojiSelect={({ emoji }) => console.log(emoji)}
+          >
+            <EmojiPicker.Search />
+            <EmojiPicker.Content />
+            <EmojiPicker.Footer />
+          </EmojiPicker.Root>
+        `}
+      />
+
+      <Heading as="h2" text="Usage" />
+      <p>
+        Import the <code>EmojiPicker</code> parts and build your own component by putting them
+        together.
+      </p>
+      <CodeBlock
+        code={`
+          <script lang="ts">
+            import { EmojiPicker } from "@gyen/frimousse";
+          </script>
+
+          <EmojiPicker.Root onEmojiSelect={({ emoji }) => console.log(emoji)}>
+            <EmojiPicker.Search />
+            <EmojiPicker.Viewport>
+              <EmojiPicker.Loading>Loading…</EmojiPicker.Loading>
+              <EmojiPicker.Empty>
+                No emoji found.
+              </EmojiPicker.Empty>
+              <EmojiPicker.List />
+            </EmojiPicker.Viewport>
+          </EmojiPicker.Root>
+        `}
+      />
+      <p>
+        Apart from a few size and overflow defaults, the parts have no styles. Style them any way
+        you like: Tailwind CSS classes, your own classes, inline styles, or the
+        <code>[frimousse-*]</code> attributes on each part. The inner parts of the list (category
+        headers, rows and emoji buttons) are <a href="#emojipicker.list">snippets</a>: spread the
+        <code>props</code> you get on your own element.
+      </p>
+      <DemoFrame name="usage" label="Tailwind CSS">
+        <UsageDemo client:visible />
+      </DemoFrame>
+      <CodeBlock
+        title="my-emoji-picker.svelte"
+        code={`
+          <script lang="ts">
+            import { EmojiPicker } from "@gyen/frimousse";
+          </script>
+
+          <EmojiPicker.Root class="isolate flex h-92 w-fit flex-col bg-white dark:bg-neutral-900">
+            <EmojiPicker.Search
+              class="z-10 mx-2 mt-2 appearance-none rounded-md bg-neutral-100 px-2.5 py-2 text-sm dark:bg-neutral-800"
+            />
+            <EmojiPicker.Viewport class="relative flex-1 outline-hidden">
+              <EmojiPicker.Loading class="absolute inset-0 flex items-center justify-center text-sm text-neutral-400">
+                Loading…
+              </EmojiPicker.Loading>
+              <EmojiPicker.Empty class="absolute inset-0 flex items-center justify-center text-sm text-neutral-400">
+                No emoji found.
+              </EmojiPicker.Empty>
+              <EmojiPicker.List class="pb-1.5 select-none">
+                {#snippet categoryHeader({ category, props })}
+                  <div {...props} class="bg-white px-3 pt-3 pb-1.5 text-xs font-medium text-neutral-600 dark:bg-neutral-900">
+                    {category.label}
+                  </div>
+                {/snippet}
+                {#snippet row({ props, children })}
+                  <div {...props} class="scroll-my-1.5 px-1.5">{@render children()}</div>
+                {/snippet}
+                {#snippet emoji({ emoji, props })}
+                  <button
+                    {...props}
+                    class="flex size-8 items-center justify-center rounded-md text-lg data-active:bg-neutral-100 dark:data-active:bg-neutral-800"
+                  >
+                    {emoji.emoji}
+                  </button>
+                {/snippet}
+              </EmojiPicker.List>
+            </EmojiPicker.Viewport>
+          </EmojiPicker.Root>
+        `}
+      />
+      <p>The same design in plain CSS, using the attributes:</p>
+      <CodeBlock
+        lang="css"
+        code={`
+          [frimousse-root] {
+            display: flex;
+            flex-direction: column;
+            width: fit-content;
+            height: 352px;
+            background: light-dark(#fff, #171717);
+            isolation: isolate;
+          }
+
+          [frimousse-search] {
+            position: relative;
+            z-index: 10;
+            appearance: none;
+            margin: 8px 8px 0;
+            padding: 8px 10px;
+            background: light-dark(#f5f5f5, #262626);
+            border-radius: 6px;
+            font-size: 14px;
+          }
+
+          [frimousse-viewport] {
+            position: relative;
+            flex: 1;
+            outline: none;
+          }
+
+          [frimousse-loading],
+          [frimousse-empty] {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: light-dark(#a1a1a1, #737373);
+            font-size: 14px;
+          }
+
+          [frimousse-list] {
+            padding-block-end: 12px;
+            user-select: none;
+          }
+
+          [frimousse-category-header] {
+            padding: 12px 12px 6px;
+            background: light-dark(#fff, #171717);
+            color: light-dark(#525252, #a1a1a1);
+            font-size: 12px;
+            font-weight: 500;
+          }
+
+          [frimousse-row] {
+            padding-inline: 12px;
+            scroll-margin-block: 12px;
+          }
+
+          [frimousse-emoji] {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: transparent;
+            font-size: 18px;
+
+            &[data-active] {
+              background: light-dark(#f5f5f5, #262626);
+            }
+          }
+        `}
+      />
+
+      <Heading as="h3" text="Options" />
+      <p>
+        Options for the whole picker are props on <code>EmojiPicker.Root</code>. Try them here; the
+        <code>skinTone</code> prop is bound with <code>bind:skinTone</code>, so it also follows the
+        ✋ button inside the picker.
+      </p>
+      <DemoFrame name="options">
+        <OptionsDemo client:visible />
+      </DemoFrame>
+      <CodeBlock
+        code={`
+          <script lang="ts">
+            import { EmojiPicker, type SkinTone } from "@gyen/frimousse";
+
+            let skinTone = $state<SkinTone>("none");
+          </script>
+
+          <EmojiPicker.Root locale="fr" columns={10} bind:skinTone>
+            <!-- ... -->
+            <EmojiPicker.SkinToneSelector />
+          </EmojiPicker.Root>
+        `}
+      />
+
+      <Heading as="h3" text="In a popover" />
+      <p>
+        Frimousse is only the picker. To show it in a popover, use the popover you already have, for
+        example{' '}
+        <a href="https://bits-ui.com/docs/components/popover" target="_blank" rel="noopener">
+          Bits UI
+        </a>{' '}
+        or the shadcn-svelte <code>Popover</code> (which is built on it).
+      </p>
+      <DemoFrame name="popover">
+        <PopoverDemo client:visible />
+      </DemoFrame>
+      <CodeBlock
+        code={`
+          <script lang="ts">
+            import * as Popover from "$lib/components/ui/popover";
+            import { Button } from "$lib/components/ui/button";
+            import * as EmojiPicker from "$lib/components/ui/emoji-picker";
+
+            let open = $state(false);
+          </script>
+
+          <Popover.Root bind:open>
+            <Popover.Trigger>
+              {#snippet child({ props })}
+                <Button {...props}>Open emoji picker</Button>
+              {/snippet}
+            </Popover.Trigger>
+            <Popover.Content class="w-fit p-0">
+              <EmojiPicker.Root
+                class="h-85.5"
+                onEmojiSelect={({ emoji }) => {
+                  open = false;
+                  console.log(emoji);
+                }}
+              >
+                <EmojiPicker.Search />
+                <EmojiPicker.Content />
+                <EmojiPicker.Footer />
+              </EmojiPicker.Root>
+            </Popover.Content>
+          </Popover.Root>
+        `}
+      />
+
+      <Heading as="h3" text="Custom data sources and locales" />
+      <p>
+        Use the{' '}
+        <a href="#emojipicker.root-props">
+          <code>resolveEmojiData</code>
+        </a>{' '}
+        prop to load emoji data from your own source, or to support locales that
+        <a href="https://emojibase.dev" target="_blank" rel="noopener">
+          Emojibase
+        </a>{' '}
+        doesn't have. Return your data for the locales you handle, and pass the rest to
+        <a href="#defaultemojidataresolver">
+          <code>defaultEmojiDataResolver</code>
+        </a>
+        .
+      </p>
+      <CodeBlock
+        code={`
+          <script lang="ts">
+            import { defaultEmojiDataResolver, EmojiPicker } from "@gyen/frimousse";
+            import { emojiData } from "./emoji-data";
+          </script>
+
+          <EmojiPicker.Root
+            locale="ne"
+            resolveEmojiData={(locale, options) =>
+              locale === "ne" ? emojiData : defaultEmojiDataResolver(locale, options)}
+          >
+            <!-- ... -->
+          </EmojiPicker.Root>
+        `}
+      />
+      <p>
+        The data uses the <code>EmojiData</code> type. For example, <code>emoji-data.ts</code>:
+      </p>
+      <CodeBlock
+        lang="ts"
+        code={`
+          import type { EmojiData } from "@gyen/frimousse";
+
+          export const emojiData: EmojiData = {
+            locale: "ne",
+            emojis: [
+              {
+                emoji: "😀",
+                label: "हाँसेको अनुहार",
+                tags: ["खुसी"],
+                category: 0,
+                version: 1,
+              },
+            ],
+            categories: [{ index: 0, label: "अनुहारहरू" }],
+            skinTones: {
+              light: "हल्का",
+              "medium-light": "मध्यम हल्का",
+              medium: "मध्यम",
+              "medium-dark": "मध्यम गाढा",
+              dark: "गाढा",
+            },
+          };
+        `}
+      />
+      <p>
+        Each emoji's <code>category</code> matches a category's <code>index</code>. Category labels
+        and
+        <code>skinTones</code> are the localized names the picker shows. The data must describe
+        standard Unicode emojis shown as text; image and sprite emojis aren't supported.
+      </p>
+      <p>
+        Any string works as a locale. The default resolver falls back to <code>en</code> when
+        Emojibase doesn't support it. Custom data is used as it is: if you need to, remove emoji
+        versions and country flags the browser can't show before you return it. A resolver can
+        return the data or a promise. To cache custom data in the browser, use{' '}
+        <a href="#createemojidatacache">
+          <code>createEmojiDataCache</code>
+        </a>
+        .
+      </p>
+
+      <Heading as="h3" text="Looking up an emoji" />
+      <p>
+        Use{' '}
+        <a href="#loademojidetails">
+          <code>loadEmojiDetails</code>
+        </a>{' '}
+        to get a stored emoji's localized label and search tags, for example to show a tooltip on a
+        reaction. It works without a picker and shares loaded data with pickers that use the same
+        locale and source.
+      </p>
+      <CodeBlock
+        code={`
+          <script lang="ts">
+            import { loadEmojiDetails } from "@gyen/frimousse";
+          </script>
+
+          {#await loadEmojiDetails("👍🏽", { locale: "en" })}
+            <span>Loading…</span>
+          {:then details}
+            <span>{details?.label ?? "Unknown emoji"}</span>
+          {:catch}
+            <span>Could not load emoji</span>
+          {/await}
+        `}
+      />
+      <p>
+        Skin tone versions return the details of the base emoji, and <code>❤</code> and{' '}
+        <code>❤️</code>
+        match the same emoji. If there is no match, the promise resolves to <code>undefined</code>.
+      </p>
+      <p>
+        For a synchronous lookup, use{' '}
+        <a href="#getemojidetails">
+          <code>getEmojiDetails</code>
+        </a>
+        . It only reads data a picker or <code>loadEmojiDetails</code> already loaded, and returns
+        <code>undefined</code> until then. Both include emojis the browser can't show.
+      </p>
+      <CodeBlock
+        lang="ts"
+        code={`
+          import { getEmojiDetails } from "@gyen/frimousse";
+
+          const details = getEmojiDetails("👍🏽", { locale: "en" });
+        `}
+      />
+
+      <Heading as="h2" text="Styling" />
+
+      <Heading as="h3" text="Dimensions" />
+      <p>
+        The picker doesn't need fixed sizes. It measures its contents (the number of columns, the
+        row height, the padding in the sticky category headers…) and sizes itself to fit. Keep the
+        <a href="#emojipicker.list-snippets">inner parts</a> of the list the same size (for example,
+        every row the same height) so the layout doesn't jump.
+      </p>
+      <p>
+        Use the{' '}
+        <a href="#emojipicker.root-css-variables">
+          <code>--frimousse-viewport-width</code>
+        </a>
+        CSS variable as a <code>max-width</code> to keep other areas, like the active emoji's name
+        below the list, from growing wider than the picker. You can still force a width, for example
+        to fill the screen on phones.
+      </p>
+
+      <Heading as="h3" text="List padding" />
+      <p>
+        Because the list is virtualized, padding on <code>EmojiPicker.List</code> itself is tricky.
+        Put horizontal padding on rows and category headers, and vertical padding on the list. To
+        keep the same vertical space when keyboard navigation scrolls to a row, set the same value
+        as
+        <code>scroll-margin-block</code> on rows.
+      </p>
+
+      <Heading as="h3" text="Colorful buttons" />
+      <p>
+        Some pickers, like Slack's, give active emojis a background color that seems random. You can
+        get the same effect with <code>:nth-child</code> selectors on rows and emojis: each row
+        cycles red, green, blue, and every other row starts one color later so columns don't share a
+        color. Hover the emojis below.
+      </p>
+      <DemoFrame name="colorful">
+        <ColorfulDemo client:visible />
+      </DemoFrame>
+
+      <Heading as="h2" text="API Reference" />
+      <p>All parts, helpers and types, with how to use them and their options.</p>
+
+      <Heading as="h3" text="EmojiPicker.Root" />
+      <p>Wraps all the picker parts.</p>
+      <CodeBlock
+        code={`
+          <EmojiPicker.Root onEmojiSelect={({ emoji }) => console.log(emoji)}>
+            <EmojiPicker.Search />
+            <EmojiPicker.Viewport>
+              <EmojiPicker.List />
+            </EmojiPicker.Viewport>
+          </EmojiPicker.Root>
+        `}
+      />
+      <Heading as="h4" prefix="EmojiPicker.Root" text="Props" />
+      <PropsTable
+        rows={[
+          {
+            name: 'onEmojiSelect',
+            type: '(emoji: Emoji) => void',
+            description: 'Called when an emoji is selected.',
+          },
+          {
+            name: 'locale',
+            type: 'Locale',
+            default: '"en"',
+            description:
+              "The locale of the picker. Any string works; locales Emojibase doesn't support can be used with a custom <code>resolveEmojiData</code>.",
+          },
+          {
+            name: 'skinTone',
+            type: 'SkinTone',
+            default: '"none"',
+            description:
+              'The skin tone of the picker. Bindable: <code>bind:skinTone</code> also picks up changes made inside the picker.',
+          },
+          {
+            name: 'columns',
+            type: 'number',
+            default: '9',
+            description: 'The number of columns in the list.',
+          },
+          {
+            name: 'sticky',
+            type: 'boolean',
+            default: 'true',
+            description: 'Whether the category headers are sticky.',
+          },
+          {
+            name: 'emojiVersion',
+            type: 'number',
+            default: 'the newest version the browser supports',
+            description:
+              'Which <a href="https://emojipedia.org/emoji-versions" target="_blank" rel="noopener">Emoji version</a> to use, to choose which emojis show regardless of what the browser supports. With a custom <code>resolveEmojiData</code>, the value is passed to the resolver, which does the filtering.',
+          },
+          {
+            name: 'emojibaseUrl',
+            type: 'string',
+            default: '"https://cdn.jsdelivr.net/npm/emojibase-data"',
+            description:
+              'Where the <a href="https://emojibase.dev/docs/datasets/" target="_blank" rel="noopener">Emojibase data</a> is fetched from, as <code>${emojibaseUrl}/${locale}/${file}.json</code>. Point it at another CDN that hosts the <code>emojibase-data</code> package, or at your own copy; if you only use one locale, you only need to host that locale\'s folder.',
+          },
+          {
+            name: 'resolveEmojiData',
+            type: 'EmojiDataResolver',
+            default: 'defaultEmojiDataResolver',
+            description:
+              'Returns <code>EmojiData</code> (or a promise of it) for the locale. It receives the locale and <code>{ emojiVersion, emojibaseUrl, signal }</code>; pass <code>signal</code> to <code>fetch</code>, as it is aborted when the picker unmounts or reloads. It runs on mount and when <code>locale</code>, <code>emojiVersion</code> or <code>emojibaseUrl</code> changes; changing only the function doesn\'t reload. See <a href="#custom-data-sources-and-locales">custom data sources and locales</a>.',
+          },
+          {
+            name: 'ref',
+            type: 'HTMLDivElement | null',
+            description: 'Bindable. The root element.',
+          },
+          { name: '…', description: 'All <code>div</code> attributes.' },
+        ]}
+      />
+      <Heading as="h4" prefix="EmojiPicker.Root" text="Attributes" />
+      <PropsTable
+        rows={[
+          attribute('[frimousse-root]'),
+          {
+            name: '[data-focused]',
+            description: 'Present when the search or the viewport has focus.',
+          },
+        ]}
+      />
+      <Heading as="h4" prefix="EmojiPicker.Root" text="CSS Variables" />
+      <PropsTable
+        rows={[
+          {
+            name: '--frimousse-emoji-font',
+            type: '<string>',
+            description: 'The font families used to show emojis.',
+          },
+          {
+            name: '--frimousse-viewport-width',
+            type: '<length>',
+            description: 'The measured width of the viewport.',
+          },
+          {
+            name: '--frimousse-viewport-height',
+            type: '<length>',
+            description: 'The measured height of the viewport.',
+          },
+          {
+            name: '--frimousse-row-height',
+            type: '<length>',
+            description: 'The measured height of a row.',
+          },
+          {
+            name: '--frimousse-category-header-height',
+            type: '<length>',
+            description: 'The measured height of a category header.',
+          },
+        ]}
+      />
+
+      <Heading as="h3" text="EmojiPicker.Search" />
+      <p>A search input that filters the emojis.</p>
+      <CodeBlock
+        code={`
+          <script lang="ts">
+            import { EmojiPicker } from "@gyen/frimousse";
+
+            let search = $state("");
+          </script>
+
+          <EmojiPicker.Root>
+            <EmojiPicker.Search bind:value={search} />
+            <!-- ... -->
+          </EmojiPicker.Root>
+        `}
+      />
+      <Heading as="h4" prefix="EmojiPicker.Search" text="Props" />
+      <PropsTable
+        rows={[
+          {
+            name: 'value',
+            type: 'string',
+            default: '""',
+            description:
+              'The search text. Pass it to set a starting value, or use <code>bind:value</code> to control it.',
+          },
+          {
+            name: 'ref',
+            type: 'HTMLInputElement | null',
+            description: 'Bindable. The input element.',
+          },
+          { name: '…', description: 'All <code>input</code> attributes.' },
+        ]}
+      />
+      <Heading as="h4" prefix="EmojiPicker.Search" text="Attributes" />
+      <PropsTable rows={[attribute('[frimousse-search]')]} />
+
+      <Heading as="h3" text="EmojiPicker.Viewport" />
+      <p>The scrolling container of the picker.</p>
+      <CodeBlock
+        code={`
+          <EmojiPicker.Viewport>
+            <EmojiPicker.Loading>Loading…</EmojiPicker.Loading>
+            <EmojiPicker.Empty>No emoji found.</EmojiPicker.Empty>
+            <EmojiPicker.List />
+          </EmojiPicker.Viewport>
+        `}
+      />
+      <Heading as="h4" prefix="EmojiPicker.Viewport" text="Props" />
+      <PropsTable
+        rows={[
+          {
+            name: 'ref',
+            type: 'HTMLDivElement | null',
+            description: 'Bindable. The viewport element.',
+          },
+          { name: '…', description: 'All <code>div</code> attributes.' },
+        ]}
+      />
+      <Heading as="h4" prefix="EmojiPicker.Viewport" text="Attributes" />
+      <PropsTable rows={[attribute('[frimousse-viewport]')]} />
+
+      <Heading as="h3" text="EmojiPicker.List" />
+      <p>
+        The list of emojis. Change how its category headers, rows and emoji buttons look with
+        snippets. Each snippet gets <code>props</code>: spread them on your element (they hold the
+        ARIA roles, data attributes, sizing styles and event handlers).
+      </p>
+      <CodeBlock
+        code={`
+          <EmojiPicker.List>
+            {#snippet categoryHeader({ category, props })}
+              <div {...props}>{category.label}</div>
+            {/snippet}
+            {#snippet row({ props, children })}
+              <div {...props}>{@render children()}</div>
+            {/snippet}
+            {#snippet emoji({ emoji, props })}
+              <button {...props}>{emoji.emoji}</button>
+            {/snippet}
+          </EmojiPicker.List>
+        `}
+      />
+      <Heading as="h4" prefix="EmojiPicker.List" text="Props" />
+      <PropsTable
+        rows={[
+          {
+            name: 'categoryHeader',
+            type: 'Snippet<[EmojiPickerListCategoryHeaderProps]>',
+            description: 'Renders a sticky category header.',
+          },
+          {
+            name: 'row',
+            type: 'Snippet<[EmojiPickerListRowProps]>',
+            description: 'Renders a row of emojis.',
+          },
+          {
+            name: 'emoji',
+            type: 'Snippet<[EmojiPickerListEmojiProps]>',
+            description: 'Renders an emoji button.',
+          },
+          {
+            name: 'ref',
+            type: 'HTMLDivElement | null',
+            description: 'Bindable. The list element.',
+          },
+          { name: '…', description: 'All <code>div</code> attributes.' },
+        ]}
+      />
+      <Heading as="h4" prefix="EmojiPicker.List" text="Attributes" />
+      <PropsTable rows={[attribute('[frimousse-list]')]} />
+      <Heading as="h4" prefix="EmojiPicker.List" text="Snippets" />
+      <PropsTable
+        rows={[
+          {
+            name: 'categoryHeader',
+            type: '{ category, props }',
+            description: 'A sticky category header. All category headers should be the same size.',
+          },
+          { ...attribute('[frimousse-category-header]'), nested: true },
+          {
+            name: 'category',
+            type: 'Category',
+            nested: true,
+            description: 'The category of this header: <code>{ label }</code>.',
+          },
+          {
+            name: 'row',
+            type: '{ props, children }',
+            description: 'A row of emojis. All rows should be the same size.',
+          },
+          { ...attribute('[frimousse-row]'), nested: true },
+          {
+            name: 'children',
+            type: 'Snippet',
+            nested: true,
+            description:
+              'The emojis of the row. Render them with <code>{@render children()}</code>.',
+          },
+          {
+            name: 'emoji',
+            type: '{ emoji, props }',
+            description: 'An emoji button. All emojis should be the same size.',
+          },
+          { ...attribute('[frimousse-emoji]'), nested: true },
+          {
+            name: '[data-active]',
+            nested: true,
+            description:
+              'Present when the emoji is active (hovered, or selected with the keyboard).',
+          },
+          {
+            name: 'emoji',
+            type: 'Emoji & { isActive: boolean }',
+            nested: true,
+            description: 'The emoji, its label, and whether it is active.',
+          },
+        ]}
+      />
+
+      <Heading as="h3" text="EmojiPicker.Loading" />
+      <p>Only renders while the emoji data is loading.</p>
+      <CodeBlock code={`<EmojiPicker.Loading>Loading…</EmojiPicker.Loading>`} />
+      <Heading as="h4" prefix="EmojiPicker.Loading" text="Props" />
+      <PropsTable
+        rows={[
+          { name: 'children', type: 'Snippet', description: 'What to show while loading.' },
+          { name: '…', description: 'All <code>span</code> attributes.' },
+        ]}
+      />
+      <Heading as="h4" prefix="EmojiPicker.Loading" text="Attributes" />
+      <PropsTable rows={[attribute('[frimousse-loading]')]} />
+
+      <Heading as="h3" text="EmojiPicker.Empty" />
+      <p>Only renders when no emoji matches the search. Its snippet receives the search text.</p>
+      <CodeBlock
+        code={`
+          <EmojiPicker.Empty>
+            {#snippet children({ search })}No emoji found for "{search}"{/snippet}
+          </EmojiPicker.Empty>
+        `}
+      />
+      <Heading as="h4" prefix="EmojiPicker.Empty" text="Props" />
+      <PropsTable
+        rows={[
+          {
+            name: 'children',
+            type: 'Snippet<[{ search: string }]>',
+            description: 'What to show when nothing matches. It receives the current search text.',
+          },
+          { name: '…', description: 'All <code>span</code> attributes.' },
+        ]}
+      />
+      <Heading as="h4" prefix="EmojiPicker.Empty" text="Attributes" />
+      <PropsTable rows={[attribute('[frimousse-empty]')]} />
+
+      <Heading as="h3" text="EmojiPicker.SkinToneSelector" />
+      <p>A button that changes the skin tone by going through the skin tones one by one.</p>
+      <CodeBlock code={`<EmojiPicker.SkinToneSelector emoji="👋" />`} />
+      <p>
+        To build your own skin tone selector, use{' '}
+        <a href="#emojipicker.skintone">
+          <code>EmojiPicker.SkinTone</code>
+        </a>{' '}
+        or{' '}
+        <a href="#useskintone">
+          <code>useSkinTone</code>
+        </a>
+        .
+      </p>
+      <Heading as="h4" prefix="EmojiPicker.SkinToneSelector" text="Props" />
+      <PropsTable
+        rows={[
+          {
+            name: 'emoji',
+            type: 'string',
+            default: '"✋"',
+            description: 'The emoji used to show the skin tones.',
+          },
+          {
+            name: 'ref',
+            type: 'HTMLButtonElement | null',
+            description: 'Bindable. The button element.',
+          },
+          { name: '…', description: 'All <code>button</code> attributes.' },
+        ]}
+      />
+      <Heading as="h4" prefix="EmojiPicker.SkinToneSelector" text="Attributes" />
+      <PropsTable rows={[attribute('[frimousse-skin-tone-selector]')]} />
+
+      <Heading as="h3" text="EmojiPicker.SkinTone" />
+      <p>
+        Gives a snippet the current skin tone, a function to change it, and the skin tone versions
+        of an emoji, to build your own skin tone selector.
+      </p>
+      <DemoFrame name="custom-skin-tone">
+        <CustomSkinToneDemo client:visible />
+      </DemoFrame>
+      <CodeBlock
+        code={`
+          <EmojiPicker.SkinTone emoji="👋">
+            {#snippet children({ skinTone, setSkinTone, skinToneVariations })}
+              {#each skinToneVariations as variation (variation.skinTone)}
+                <button
+                  aria-pressed={variation.skinTone === skinTone}
+                  onclick={() => setSkinTone(variation.skinTone)}
+                >
+                  {variation.emoji}
+                </button>
+              {/each}
+            {/snippet}
+          </EmojiPicker.SkinTone>
+        `}
+      />
+      <Heading as="h4" prefix="EmojiPicker.SkinTone" text="Props" />
+      <PropsTable
+        rows={[
+          {
+            name: 'emoji',
+            type: 'string',
+            default: '"✋"',
+            description: 'The emoji used to show the skin tones.',
+          },
+          {
+            name: 'children',
+            type: 'Snippet<[{ skinTone, setSkinTone, skinToneVariations }]>',
+            required: true,
+            description:
+              'Receives the current skin tone, a function to change it, and the skin tone versions of the emoji.',
+          },
+        ]}
+      />
+
+      <Heading as="h3" text="EmojiPicker.ActiveEmoji" />
+      <p>
+        Gives a snippet the active emoji (hovered, or selected with the keyboard), for example to
+        show a preview below the list.
+      </p>
+      <CodeBlock
+        code={`
+          <EmojiPicker.ActiveEmoji>
+            {#snippet children({ emoji })}
+              {#if emoji}
+                <span>{emoji.emoji} {emoji.label}</span>
+              {:else}
+                <span>Select an emoji…</span>
+              {/if}
+            {/snippet}
+          </EmojiPicker.ActiveEmoji>
+        `}
+      />
+      <Heading as="h4" prefix="EmojiPicker.ActiveEmoji" text="Props" />
+      <PropsTable
+        rows={[
+          {
+            name: 'children',
+            type: 'Snippet<[{ emoji?: Emoji }]>',
+            required: true,
+            description: 'Receives the active emoji, or <code>undefined</code>.',
+          },
+        ]}
+      />
+
+      <Heading as="h3" text="useSkinTone" />
+      <p>
+        Returns the current skin tone as <code>current</code> (which you can also set) and the skin
+        tone versions of an emoji as <code>variations</code>. Call it while a component inside
+        <code>EmojiPicker.Root</code> starts.
+      </p>
+      <CodeBlock
+        code={`
+          <script lang="ts">
+            import { useSkinTone } from "@gyen/frimousse";
+
+            const skinTone = useSkinTone("👋");
+          </script>
+
+          <!-- (👋) (👋🏻) (👋🏼) (👋🏽) (👋🏾) (👋🏿) -->
+          {#each skinTone.variations as variation (variation.skinTone)}
+            <button onclick={() => (skinTone.current = variation.skinTone)}>
+              {variation.emoji}
+            </button>
+          {/each}
+        `}
+      />
+      <Heading as="h4" prefix="useSkinTone" text="Parameters" />
+      <PropsTable
+        rows={[
+          {
+            name: 'emoji',
+            type: 'string | (() => string | undefined)',
+            default: '"✋"',
+            description:
+              'The emoji used to show the skin tones. Pass a function to keep it reactive.',
+          },
+        ]}
+      />
+
+      <Heading as="h3" text="useActiveEmoji" />
+      <p>
+        Returns the active emoji (hovered, or selected with the keyboard) as <code>current</code>.
+        Call it while a component inside <code>EmojiPicker.Root</code> starts.
+      </p>
+      <CodeBlock
+        code={`
+          <script lang="ts">
+            import { useActiveEmoji } from "@gyen/frimousse";
+
+            const activeEmoji = useActiveEmoji();
+          </script>
+
+          {#if activeEmoji.current}
+            <span>{activeEmoji.current.emoji} {activeEmoji.current.label}</span>
+          {:else}
+            <span>Select an emoji…</span>
+          {/if}
+        `}
+      />
+
+      <Heading as="h3" text="defaultEmojiDataResolver" />
+      <p>
+        Loads and caches Emojibase data, leaving out emojis the browser can't show. It is the
+        default resolver of <code>EmojiPicker.Root</code>; call it for locales your own resolver
+        doesn't handle.
+      </p>
+      <CodeBlock
+        lang="ts"
+        code={`
+          import { defaultEmojiDataResolver } from "@gyen/frimousse";
+
+          const data = await defaultEmojiDataResolver("fr", {});
+        `}
+      />
+      <Heading as="h4" prefix="defaultEmojiDataResolver" text="Parameters" />
+      <PropsTable
+        rows={[
+          {
+            name: 'locale',
+            type: 'Locale',
+            required: true,
+            description:
+              "The locale to load. Falls back to <code>en</code> when Emojibase doesn't support it.",
+          },
+          {
+            name: 'options',
+            type: 'object',
+            required: true,
+            description:
+              '<code>emojiVersion</code> and <code>emojibaseUrl</code>, which work like the <a href="#emojipicker.root-props">picker props</a>, and an optional <code>signal</code> to cancel loading. Pass <code>{}</code> for the defaults.',
+          },
+        ]}
+      />
+      <p>
+        Returns a promise of <code>EmojiData</code>. Loading errors reject the promise.
+      </p>
+
+      <Heading as="h3" text="createEmojiDataCache" />
+      <p>
+        Creates a cache that keeps custom emoji data in <code>localStorage</code>. Read and write it
+        in your resolver to reuse data across visits. Give it your own name to keep it apart from
+        the default resolver's data.
+      </p>
+      <CodeBlock
+        lang="ts"
+        code={`
+          import {
+            createEmojiDataCache,
+            defaultEmojiDataResolver,
+            type EmojiData,
+            type EmojiDataResolver,
+          } from "@gyen/frimousse";
+
+          const cache = createEmojiDataCache({ name: "my-app/emoji-data" });
+
+          export const resolveEmojiData: EmojiDataResolver = async (locale, options) => {
+            if (locale !== "ne") return defaultEmojiDataResolver(locale, options);
+
+            const cached = cache.get(locale);
+
+            if (cached) return cached.data;
+
+            const response = await fetch("/emoji-data/ne.json", { signal: options.signal });
+
+            if (!response.ok) throw new Error("Could not load emoji data");
+
+            const data: EmojiData = await response.json();
+            cache.set(locale, data);
+
+            return data;
+          };
+        `}
+      />
+      <p>
+        Entries stay until you replace or remove them; the cache doesn't check for updates. If
+        browser storage isn't available, reads return <code>null</code> and writes do nothing.
+      </p>
+      <Heading as="h4" prefix="createEmojiDataCache" text="Parameters" />
+      <PropsTable
+        rows={[
+          {
+            name: 'options.name',
+            type: 'string',
+            default: '"frimousse/data"',
+            description: 'The cache name. Each entry is stored under its locale.',
+          },
+        ]}
+      />
+      <Heading as="h4" prefix="createEmojiDataCache" text="Methods" />
+      <PropsTable
+        rows={[
+          {
+            name: 'get(locale)',
+            description:
+              'Returns <code>{ data, metadata }</code>, or <code>null</code> if the entry is missing or broken.',
+          },
+          {
+            name: 'set(locale, data, metadata?)',
+            description: 'Stores data and optional metadata for a locale, replacing any old entry.',
+          },
+          { name: 'delete(locale)', description: 'Removes the entry for a locale.' },
+          { name: 'clear()', description: 'Removes all entries with this cache name.' },
+        ]}
+      />
+
+      <Heading as="h3" text="getEmojiDetails" />
+      <p>
+        Reads an emoji's localized details from data already in memory, loaded by a picker or
+        <code>loadEmojiDetails</code>. It never fetches, reads browser storage, or calls a resolver.
+      </p>
+      <CodeBlock
+        lang="ts"
+        code={`
+          import { getEmojiDetails } from "@gyen/frimousse";
+
+          const details = getEmojiDetails("👍🏽", { locale: "en" });
+
+          details?.label; // "Thumbs up"
+          details?.emoji; // "👍"
+        `}
+      />
+      <Heading as="h4" prefix="getEmojiDetails" text="Parameters" />
+      <PropsTable
+        rows={[
+          {
+            name: 'emoji',
+            type: 'string',
+            required: true,
+            description:
+              "The emoji to look up. Skin tone versions return the base emoji's details.",
+          },
+          {
+            name: 'options.locale',
+            type: 'Locale',
+            default: '"en"',
+            description: 'The locale to use.',
+          },
+          {
+            name: 'options.emojibaseUrl',
+            type: 'string',
+            description: 'The Emojibase source, like the picker prop.',
+          },
+          {
+            name: 'options.emojiVersion',
+            type: 'number',
+            description:
+              "Picks the same versioned source as the picker prop. Lookups don't remove emojis the browser can't show.",
+          },
+          {
+            name: 'options.resolveEmojiData',
+            type: 'EmojiDataResolver',
+            description:
+              'Points to a custom data source without calling it. Pass the same function and options the picker used.',
+          },
+        ]}
+      />
+      <Heading as="h4" prefix="getEmojiDetails" text="Return value" />
+      <p>
+        <code>EmojiDetails</code>, or <code>undefined</code> if the data isn't loaded or nothing
+        matches. Its fields:
+      </p>
+      <PropsTable
+        rows={[
+          { name: 'emoji', type: 'string', description: 'The base emoji, without a skin tone.' },
+          { name: 'label', type: 'string', description: 'The localized name.' },
+          { name: 'tags', type: 'string[]', description: 'The localized search tags.' },
+          {
+            name: 'category',
+            type: 'number',
+            description: "Matches a category's <code>index</code>.",
+          },
+          {
+            name: 'version',
+            type: 'number',
+            description: 'The Emoji version that added this emoji.',
+          },
+          {
+            name: 'countryFlag',
+            type: 'true | undefined',
+            description: 'Whether the emoji is a country flag.',
+          },
+          {
+            name: 'skins',
+            type: 'object | undefined',
+            description: 'Skin tone versions, by skin tone.',
+          },
+          {
+            name: 'aliases',
+            type: 'string[] | undefined',
+            description: 'Other sequences that match, like mixed skin tones.',
+          },
+        ]}
+      />
+
+      <Heading as="h3" text="loadEmojiDetails" />
+      <p>
+        Like <code>getEmojiDetails</code>, but returns a promise and loads the data first if needed.
+        It works outside <code>EmojiPicker.Root</code> and shares loaded data and pending requests
+        with pickers. This replaces React's <code>useEmojiDetails</code>: use it with{' '}
+        <code>{'{#await}'}</code>.
+      </p>
+      <CodeBlock
+        lang="ts"
+        code={`
+          import { loadEmojiDetails } from "@gyen/frimousse";
+
+          const details = await loadEmojiDetails("👍🏽", { locale: "en" });
+        `}
+      />
+      <p>
+        It takes the same emoji and options as{' '}
+        <a href="#getemojidetails">
+          <code>getEmojiDetails</code>
+        </a>
+        . A custom <code>resolveEmojiData</code> is called when its data isn't loaded yet, with the
+        locale,
+        <code>emojiVersion</code> and <code>emojibaseUrl</code> (no <code>signal</code>); calls with
+        the same function and options share one request. Loading errors reject the promise and are
+        kept for that source, until a picker loads the same source successfully.
+      </p>
+
+      <Heading as="h2" text="Differences from React" />
+      <p>The API follows the React version. Where Svelte has its own way, it uses it:</p>
+      <ul>
+        <li>
+          Render props are snippets: <code>EmojiPicker.List</code>'s <code>components</code> prop
+          becomes the
+          <code>categoryHeader</code>, <code>row</code> and <code>emoji</code> snippets, and
+          <code>Empty</code>, <code>ActiveEmoji</code> and <code>SkinTone</code> take a
+          <code>children</code> snippet.
+        </li>
+        <li>
+          <code>EmojiPicker.Search</code> uses <code>bind:value</code> instead of <code>value</code>{' '}
+          and
+          <code>onChange</code>, and <code>EmojiPicker.Root</code> supports{' '}
+          <code>bind:skinTone</code>.
+        </li>
+        <li>
+          Every element part has a bindable <code>ref</code> instead of React refs.
+        </li>
+        <li>
+          <code>useSkinTone</code> and <code>useActiveEmoji</code> return objects with a reactive
+          <code>current</code> instead of tuples.
+        </li>
+        <li>
+          <code>useEmojiDetails</code> (which needs Suspense) is <code>loadEmojiDetails</code>,
+          which returns a promise.
+        </li>
+      </ul>
+
+      <Heading as="h2" text="Credits" />
+      <p>
+        This is a port of{' '}
+        <a href="https://github.com/liveblocks/frimousse" target="_blank" rel="noopener">
+          Frimousse
+        </a>{' '}
+        by{' '}
+        <a href="https://liveblocks.io" target="_blank" rel="noopener">
+          Liveblocks
+        </a>
+        , under the MIT license. The design of the API, the docs and the shadcn component come from
+        it. “Frimousse” means “little face” in French. The emoji data comes from{' '}
+        <a href="https://emojibase.dev" target="_blank" rel="noopener">
+          Emojibase
+        </a>
+        .
+      </p>
+    </main>
+
+    <aside class="hidden w-56 shrink-0 lg:block">
+      <div class="sticky top-14 max-h-[calc(100dvh-3.5rem)] overflow-y-auto py-14">
+        <Toc entries={toc} />
+      </div>
+    </aside>
+  </div>
+  <footer class="border-t">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-sm text-muted-foreground sm:px-6">
+      <span>
+        MIT license. Svelte port by{' '}
+        <a href={site.author.url} class="text-foreground hover:underline">
+          {site.author.name}
+        </a>
+        .
+      </span>
+      <span>
+        Based on{' '}
+        <a href={site.original} class="text-foreground hover:underline">
+          Frimousse
+        </a>{' '}
+        by Liveblocks.
+      </span>
+    </div>
+  </footer>
+</BaseLayout>

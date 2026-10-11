@@ -1,0 +1,16 @@
+# Package managers
+pnpm-lock.yaml
+
+# Dependencies & build output
+node_modules
+dist
+.svelte-kit
+.astro
+.wrangler
+.cloudflare
+
+# Generated shadcn-svelte registry output (built from website/src/lib/registry).
+website/public/r
+
+# Vendored shadcn-svelte components — re-fetched from upstream, not ours to restyle.
+website/src/lib/components/ui

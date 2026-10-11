@@ -1,0 +1,37 @@
+---
+import { preloadFile } from '@pierre/diffs/ssr';
+import type { SupportedLanguages } from '@pierre/diffs';
+
+interface Props {
+  code: string;
+  lang?: SupportedLanguages;
+  /** Becomes the file header. */
+  title?: string;
+}
+const { code, lang = 'svelte', title } = Astro.props;
+// Lets code be written indented inside template literals in the page.
+const lines = code.replace(/^\n/, '').replace(/\s+$/, '').split('\n');
+const indent = Math.min(
+  ...lines.filter((line) => line.trim()).map((line) => line.match(/^ */)![0].length),
+);
+const source = lines.map((line) => line.slice(indent)).join('\n');
+// Pre-rendered into a declarative shadow root at build time, like effectelements.com's Markdown code blocks.
+const { prerenderedHTML } = await preloadFile({
+  file: { name: title ?? `snippet.${lang}`, contents: source, lang },
+  options: {
+    theme: { dark: 'pierre-dark', light: 'pierre-light' },
+    themeType: 'system',
+    disableFileHeader: !title,
+    overflow: 'scroll',
+  },
+});
+---
+
+<div class="code-block my-5">
+  <diffs-container>
+    <template shadowrootmode="open" set:html={prerenderedHTML} />
+  </diffs-container>
+  <button type="button" class="copy-code" aria-label="Copy code" data-code={source}>
+    Copy
+  </button>
+</div>

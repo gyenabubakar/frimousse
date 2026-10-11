@@ -1,0 +1,14 @@
+---
+import { renderIcon } from '$lib/icons';
+import type { IconOptions } from '$lib/icons';
+
+interface Props {
+  /** "ph-bell" or "ph:bell" */
+  name: string;
+  iconify?: IconOptions;
+  class?: string;
+}
+const { name, iconify, class: className } = Astro.props;
+---
+
+<Fragment set:html={renderIcon(name, iconify, className)} />

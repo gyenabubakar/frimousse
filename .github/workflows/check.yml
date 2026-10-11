@@ -1,0 +1,30 @@
+name: Check
+
+on:
+  pull_request:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # pnpm version comes from `packageManager` in package.json.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @gyen/frimousse exec playwright install --with-deps chromium-headless-shell
+      - run: pnpm --filter website exec playwright install --with-deps chromium
+      # The site type-checks against the library's dist/, so build first.
+      - run: pnpm build
+      # Read-only: fails on unformatted or lint-failing code instead of rewriting it like `pnpm check`.
+      - run: pnpm check:ci
+      - run: pnpm test
+      # End-to-end tests of the built site (its demos, theme, table of contents and registry).
+      - run: pnpm test:e2e

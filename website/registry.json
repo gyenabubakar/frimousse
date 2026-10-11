@@ -1,0 +1,38 @@
+{
+  "$schema": "https://shadcn-svelte.com/schema/registry.json",
+  "name": "frimousse",
+  "homepage": "https://frimousse.gyen.dev",
+  "items": [
+    {
+      "name": "emoji-picker",
+      "type": "registry:ui",
+      "title": "Emoji Picker",
+      "description": "An emoji picker styled for shadcn-svelte, built on @gyen/frimousse (a Svelte 5 port of Liveblocks' Frimousse).",
+      "author": "gyenabubakar (Svelte port of Frimousse by Liveblocks)",
+      "dependencies": ["@gyen/frimousse", "phosphor-svelte"],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "./src/lib/registry/emoji-picker/emoji-picker.svelte",
+          "type": "registry:ui"
+        },
+        {
+          "path": "./src/lib/registry/emoji-picker/emoji-picker-search.svelte",
+          "type": "registry:ui"
+        },
+        {
+          "path": "./src/lib/registry/emoji-picker/emoji-picker-content.svelte",
+          "type": "registry:ui"
+        },
+        {
+          "path": "./src/lib/registry/emoji-picker/emoji-picker-footer.svelte",
+          "type": "registry:ui"
+        },
+        {
+          "path": "./src/lib/registry/emoji-picker/index.ts",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}

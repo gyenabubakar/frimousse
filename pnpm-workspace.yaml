@@ -1,0 +1,10 @@
+packages:
+  - frimousse
+  - website
+
+# `allowBuilds` needs pnpm 10.26+. Cloudflare Workers Builds needs a PNPM_VERSION build variable (11.28.2,
+# matching `packageManager`) set in the dashboard, or its default pnpm ignores this.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true

@@ -1,0 +1,68 @@
+---
+import '$styles/global.css';
+
+import { site } from '$site';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description = site.description } = Astro.props;
+const fullTitle = title ? `${title} · ${site.name}` : `${site.name} — ${site.description}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const beaconToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{fullTitle}</title>
+    <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="description" content={description} />
+    <meta name="author" content={site.author.name} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:creator" content={site.author.handle} />
+    {beaconToken && (
+      <script
+        is:inline
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: beaconToken })}
+      />
+    )}
+    <script is:inline>
+      (() => {
+        const stored = localStorage.getItem('theme');
+        const dark = stored
+          ? stored === 'dark'
+          : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', dark);
+      })();
+    </script>
+  </head>
+  <body class="min-h-dvh">
+    <slot />
+    <script>
+      // Code blocks copy their source.
+      document.addEventListener('click', async (event) => {
+        const target = event.target as HTMLElement;
+        const copyCode = target.closest<HTMLButtonElement>('.copy-code');
+
+        if (!copyCode) return;
+
+        await navigator.clipboard.writeText(copyCode.dataset.code ?? '');
+        copyCode.textContent = 'Copied';
+        setTimeout(() => (copyCode.textContent = 'Copy'), 1500);
+      });
+    </script>
+  </body>
+</html>

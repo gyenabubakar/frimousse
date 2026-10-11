@@ -1,0 +1,19 @@
+---
+import { slug } from '$lib/slug';
+
+interface Props {
+  as: 'h2' | 'h3' | 'h4';
+  /** Text to put before the slug, so repeated h4s ("Props") stay unique: "EmojiPicker.Root" → emojipicker.root-props. */
+  prefix?: string;
+  text: string;
+}
+const { as: Tag, prefix, text } = Astro.props;
+const id = slug(prefix ? `${prefix}-${text}` : text);
+---
+
+<Tag id={id}>
+  {text}
+  <a class="heading-anchor" href={`#${id}`} aria-label={`Link to ${text}`}>
+    #
+  </a>
+</Tag>

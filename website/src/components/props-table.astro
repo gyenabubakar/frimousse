@@ -1,0 +1,35 @@
+---
+export interface PropRow {
+  name: string;
+  type?: string;
+  default?: string;
+  required?: boolean;
+  /** Indented under the row above it. */
+  nested?: boolean;
+  /** HTML, so descriptions can hold `<code>` and links. */
+  description: string;
+}
+
+interface Props {
+  rows: PropRow[];
+}
+const { rows } = Astro.props;
+---
+
+<div class="my-5 divide-y border text-sm">
+  {rows.map((row) => (
+    <div class:list={['grid gap-1.5 px-4 py-3', row.nested && 'pl-9']}>
+      <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono text-[13px]">
+        <span class="font-medium text-foreground">{row.name}</span>
+        {row.required && <span class="text-[11px] text-ember">required</span>}
+        {row.type && <span class="text-muted-foreground">{row.type}</span>}
+        {row.default && (
+          <span class="text-muted-foreground">
+            = <span class="text-foreground/80">{row.default}</span>
+          </span>
+        )}
+      </div>
+      <div class="text-foreground/80 [&_p]:my-0!" set:html={row.description} />
+    </div>
+  ))}
+</div>

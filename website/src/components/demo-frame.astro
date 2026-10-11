@@ -1,0 +1,16 @@
+---
+interface Props {
+  /** Shown above the demo. */
+  label?: string;
+  /** Identifies the demo for the end-to-end tests (`data-demo`). */
+  name: string;
+}
+const { label, name } = Astro.props;
+---
+
+<figure class="not-docs my-6 border" data-demo={name}>
+  {label && <figcaption class="label-mono border-b px-4 py-2">{label}</figcaption>}
+  <div class="grid-paper flex min-h-80 items-center justify-center overflow-x-auto p-6 sm:p-10">
+    <slot />
+  </div>
+</figure>
